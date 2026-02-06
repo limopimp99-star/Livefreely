@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Freely Empire | Dee Paredes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@200;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --gold: #d4af37;
+            --black: #050505;
+            --white: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        
+        body { 
+            background-color: var(--black); 
+            color: white; 
+            font-family: 'Montserrat', sans-serif; 
+            overflow-x: hidden;
+        }
+
+        /* --- GOLD GLITTER RAIN --- */
+        #glitter-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 9999; opacity: 1;
+        }
+
+        /* --- CURSOR --- */
+        #cursor {
+            position: fixed; width: 15px; height: 15px; background: var(--gold);
+            border-radius: 50%; pointer-events: none; z-index: 10001;
+            box-shadow: 0 0 15px var(--gold);
+            transform: translate(-50%, -50%);
+            transition: transform 0.05s linear;
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed; width: 100%; padding: 20px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 2000; background: rgba(0,0,0,0.9); border-bottom: 1px solid #222;
+        }
+        .logo { font-family: 'Playfair Display', serif; font-size: 1.2rem; letter-spacing: 3px; color: var(--gold); }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { color: white; text-decoration: none; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; transition: 0.3s; }
+        .nav-links a:hover { color: var(--gold); }
+        .login-btn { 
+            border: 1px solid var(--gold); padding: 10px 25px; border-radius: 30px; 
+            color: var(--gold); font-size: 0.7rem; letter-spacing: 2px; cursor: pointer; transition: 0.3s;
+        }
+        .login-btn:hover { background: var(--gold); color: black; }
+
+        /* --- HERO --- */
+        .hero { height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
+        
+        .hero-video { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            object-fit: cover; opacity: 0.8; z-index: 0; 
+            /* CINEMATIC FILTER */
+            filter: contrast(1.1) saturate(1.1); 
+        }
+
+        /* --- THE MESH OVERLAY (INTENSITY INCREASED) --- */
+        .mesh-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+            /* Increased Opacity for Visibility */
+            opacity: 0.6; 
+            background-image: url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 3h1v1H1V3zm2-2h1v1H3V1z' fill='%23000000' fill-opacity='0.8' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+        
+        /* Dark Gradient at bottom */
+        .hero::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 50%;
+            background: linear-gradient(to bottom, transparent, #000);
+            z-index: 1; pointer-events: none;
+        }
+
+        /* --- SCROLL ANIMATIONS --- */
+        .fade-up {
+            opacity: 0; transform: translateY(40px); transition: all 1s ease-out;
+        }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+        /* --- BIO SECTION --- */
+        .bio-section { 
+            min-height: 80vh; display: flex; align-items: stretch; 
+            background: #000; transition: background 1.5s ease;
+        }
+        .bio-section.light-mode { background: white; }
+        
+        .bio-img { 
+            flex: 1; 
+            background: url('dee.jpg') center/cover no-repeat;
+            min-height: 500px;
+        }
+        .bio-text { 
+            flex: 1; padding: 80px; display: flex; flex-direction: column; justify-content: center; 
+            transition: color 1.5s;
+        }
+        
+        .bio-text h2 { font-family: 'Playfair Display', serif; font-size: 3.5rem; margin-bottom: 30px; color: white; transition: color 1.5s; }
+        .bio-text p { color: #ccc; line-height: 1.8; margin-bottom: 20px; font-size: 1rem; transition: color 1.5s; }
+        .bio-contact { color: var(--gold) !important; font-weight: bold; margin-top: 20px; }
+
+        .bio-section.light-mode .bio-text h2 { color: black; }
+        .bio-section.light-mode .bio-text p { color: #333; }
+
+        /* --- BUSINESS SECTIONS (PARALLAX + VIDEO) --- */
+        .biz-section { 
+            height: 90vh; position: relative; display: flex; align-items: center; 
+            justify-content: center; border-bottom: 1px solid #222;
+            background-attachment: fixed; background-position: center;
+            background-repeat: no-repeat; background-size: cover; overflow: hidden;
+        }
+
+        /* Video Backgrounds */
+        .biz-section video {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: 0; filter: brightness(0.4);
+        }
+
+        /* Static Backgrounds */
+        #events { background-image: url('birthday.webp'); } 
+        #finance { background-image: url('https://images.pexels.com/photos/259027/pexels-photo-259027.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'); }
+
+        .biz-content { 
+            position: relative; z-index: 10; text-align: center; max-width: 800px; padding: 50px;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border: 1px solid rgba(212,175,55,0.5);
+        }
+        .biz-content h2 { font-family: 'Playfair Display', serif; font-size: 4rem; margin-bottom: 20px; color: white; }
+        .biz-content p { font-size: 1.1rem; color: #ddd; margin-bottom: 40px; }
+
+        /* --- BLACK CARD (RESTORED GRADIENT FEEL) --- */
+        .black-card-wrapper { padding: 150px 0; background: #000; text-align: center; position: relative; z-index: 2; }
+        
+        .black-card-container {
+            position: relative; width: 650px; margin: 0 auto; padding: 6px; 
+            border-radius: 25px; overflow: hidden; 
+            background: #111; /* Fallback */
+            box-shadow: 0 0 100px rgba(212,175,55,0.15); /* Gold Glow */
+        }
+
+        /* The Spinning Gradient Border */
+        .black-card-container::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(transparent 0deg, var(--gold) 90deg, transparent 180deg, var(--gold) 270deg, transparent 360deg);
+            animation: spin-shrink 6s linear infinite;
+        }
+
+        .black-card-inner {
+            position: relative; background: linear-gradient(135deg, #1a1a1a 0%, #000 100%); /* Inner Gradient Feel */
+            border-radius: 20px; padding: 100px 50px; z-index: 2;
+        }
+
+        @keyframes spin-shrink {
+            0% { transform: rotate(0deg) scale(1.4); } 
+            50% { transform: rotate(180deg) scale(0.65); } /* CLOSES IN */
+            100% { transform: rotate(360deg) scale(1.4); }
+        }
+
+        /* --- REVIEWS --- */
+        .reviews-section { padding: 100px 10%; background: #111; text-align: center; border-top: 1px solid #333; }
+        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-top: 60px; }
+        .review-card { background: #000; padding: 40px; border: 1px solid #333; border-radius: 10px; transition: 0.3s; }
+        .review-card:hover { border-color: var(--gold); transform: translateY(-10px); }
+        .stars { color: var(--gold); letter-spacing: 5px; margin-bottom: 20px; font-size: 1.2rem; }
+
+        /* --- AI BOT FAB --- */
+        .ai-fab {
+            position: fixed; bottom: 40px; right: 40px; width: 60px; height: 60px;
+            background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999; cursor: pointer; font-size: 1.5rem;
+            animation: bounce 2s infinite;
+        }
+        .chat-box {
+            position: fixed; bottom: 110px; right: 40px; width: 300px; height: 400px;
+            background: #111; border: 1px solid var(--gold); border-radius: 20px;
+            display: none; flex-direction: column; z-index: 10000; overflow: hidden;
+        }
+        .chat-header { background: var(--gold); color: black; padding: 15px; font-weight: bold; }
+        .chat-body { padding: 20px; color: #ccc; font-size: 0.9rem; }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
+
+        /* --- FOOTER --- */
+        footer { background: #050505; padding: 80px 10%; border-top: 1px solid #222; text-align: center; }
+        .social-icons { margin-bottom: 40px; }
+        .social-icons a { color: white; font-size: 1.5rem; margin: 0 15px; transition: 0.3s; }
+        .social-icons a:hover { color: var(--gold); transform: translateY(-5px); display: inline-block; }
+        .footer-links { display: flex; justify-content: center; gap: 30px; margin-bottom: 40px; flex-wrap: wrap; }
+        .footer-links a { color: #888; text-decoration: none; font-size: 0.9rem; letter-spacing: 1px; transition: 0.3s; cursor: pointer; }
+        .footer-links a:hover { color: white; }
+
+        /* --- UTILS --- */
+        .gold-btn { padding: 18px 50px; background: var(--gold); color: black; font-weight: bold; text-decoration: none; border-radius: 50px; display: inline-block; transition: 0.3s; }
+        .gold-btn:hover { background: white; transform: scale(1.05); }
+
+        /* --- MODALS --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center; }
+        .login-box { background: #111; padding: 60px; border: 1px solid var(--gold); text-align: center; width: 400px; border-radius: 10px; max-height: 80vh; overflow-y: auto; }
+        .login-input { width: 100%; padding: 15px; margin: 10px 0; background: #222; border: none; color: white; }
+
+        @media(max-width: 768px) {
+            .nav-links { display: none; }
+            .bio-section { flex-direction: column; }
+            .bio-img { height: 50vh; width: 100%; }
+            .bio-text { padding: 40px; }
+            #cursor { display: none; }
+            .black-card-container { width: 90%; }
+            .biz-section { background-attachment: scroll; }
+            .footer-links { flex-direction: column; gap: 15px; }
+            .hero-content h1 { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <canvas id="glitter-canvas"></canvas>
+
+    <nav>
+        <div class="logo">LIVE FREELY</div>
+        <div class="nav-links">
+            <a href="https://lfycmiami.com/our-fleet" target="_blank">Yachts</a>
+            <a href="https://linktr.ee/dluxxtransportation" target="_blank">Transport</a>
+            <a href="https://www.instagram.com/yourdreamevents__" target="_blank">Events</a>
+            <a href="https://www.instagram.com/livefreelyfinancial" target="_blank">Finance</a>
+        </div>
+        <div class="login-btn" onclick="openLogin()">MEMBER LOGIN</div>
+    </nav>
+
+    <section class="hero">
+        <div class="mesh-overlay"></div> <video class="hero-video" autoplay muted loop playsinline>
+            <source src="5.mp4" type="video/mp4">
+        </video>
+    </section>
+
+    <section class="bio-section fade-up" id="visionary">
+        <div class="bio-img"></div> 
+        <div class="bio-text">
+            <h2>The Visionary.</h2>
+            <p><strong>Dee Paredes</strong> is the President of Sales & CEO of the <strong>Live Freely Collective</strong>. Starting in 2018 with a single vessel, she has now a multi-vertical empire including a fleet of 25+ luxury yachts, <strong>Dluxx Transportation Services</strong>, <strong>Dream Events Catering</strong>, and <strong>Live Freely Financial Services</strong>.</p>
+            <p class="bio-contact">954.260.4915 | LFYCMIAMI@GMAIL.COM</p>
+        </div>
+    </section>
+
+    <section class="biz-section fade-up" id="transport">
+        <video autoplay muted loop playsinline>
+            <source src="6.mp4" type="video/mp4">
+        </video>
+        <div class="biz-content">
+            <h2>Dluxx Logistics</h2>
+            <p>Private Sprinters & Executive Escorts.</p>
+            <a href="https://linktr.ee/dluxxtransportation" target="_blank" class="gold-btn">BOOK TRANSPORT</a>
+        </div>
+    </section>
+
+    <section class="biz-section fade-up" id="events">
+        <div class="biz-content">
+            <h2>Dream Events</h2>
+            <p>Baby Showers. Birthdays. Yacht Activations.</p>
+            <a href="https://www.instagram.com/yourdreamevents__" target="_blank" class="gold-btn">VIEW GALLERY</a>
+        </div>
+    </section>
+
+    <section class="biz-section fade-up" id="finance">
+        <div class="biz-content">
+            <h2>Wealth Strategy</h2>
+            <p>Tax & Asset Protection Systems.</p>
+            <a href="https://www.instagram.com/livefreelyfinancial" target="_blank" class="gold-btn">CONSULTATION</a>
+        </div>
+    </section>
+
+    <section class="biz-section fade-up" id="fleet">
+        <video autoplay muted loop playsinline>
+            <source src="7.mp4" type="video/mp4">
+        </video>
+        <div class="biz-content">
+            <h2>The Fleet (25+)</h2>
+            <p>From 55' Azimuts to 116' Mega Yachts.</p>
+            <a href="https://lfycmiami.com/our-fleet" target="_blank" class="gold-btn">VIEW INVENTORY</a>
+        </div>
+    </section>
+
+    <div class="black-card-wrapper fade-up">
+        <div class="black-card-container">
+            <div class="black-card-inner">
+                <h2 style="font-family: 'Playfair Display', serif; font-size: 3rem; color: var(--gold); margin-bottom: 20px;">THE BLACK CARD</h2>
+                <p style="letter-spacing: 5px; color: white; opacity: 0.8; margin-bottom: 30px;">ONE BILLING. ZERO WAIT.</p>
+                <div class="gold-btn">APPLY FOR ACCESS</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="reviews-section fade-up">
+        <h2 style="font-family: 'Playfair Display', serif; font-size: 3rem; color: white; margin-bottom: 50px;">Client Stories</h2>
+        <div class="reviews-grid">
+            <div class="review-card">
+                <div class="stars">★★★★★</div>
+                <p>"Handled the entire weekend flawlessly. From the jet pickup to the yacht party."</p>
+                <br>
+                <a href="https://linktr.ee/dluxxtransportation" target="_blank" style="color: var(--gold); text-decoration: none; font-size: 0.8rem; font-weight: bold;">VIEW CHAUFFEUR CLIENT REVIEWS &rarr;</a>
+            </div>
+            <div class="review-card">
+                <div class="stars">★★★★★</div>
+                <p>"The only way to book in Miami. The Black Card service is unmatched."</p>
+                <br>
+                <a href="https://www.instagram.com/stories/highlights/17927182589892669/" target="_blank" style="color: var(--gold); text-decoration: none; font-size: 0.8rem; font-weight: bold;">WATCH YACHT CLIENT STORIES &rarr;</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="logo" style="color:var(--gold); margin-bottom: 30px;">LIVE FREELY</div>
+        <div class="social-icons">
+            <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/livefreely_yachtcharters/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://linktr.ee/dluxxtransportation" target="_blank"><i class="fas fa-link"></i></a>
+        </div>
+        <div class="footer-links">
+            <a href="#" onclick="openModal('careers')">CAREERS</a>
+            <a href="#" onclick="openModal('terms')">TERMS OF SERVICE</a>
+            <a href="#" onclick="openModal('terms')">BLACK CARD POLICY</a>
+            <a href="mailto:lfycmiami@gmail.com">CONTACT</a>
+        </div>
+        <p style="font-size: 0.6rem; color: #444; letter-spacing: 5px; margin-top: 30px;">© 2026 THE COLLECTIVE | POWERED BY ELUSIVESTUDIO OS</p>
+    </footer>
+
+    <div class="ai-fab" onclick="toggleChat()">🤖</div>
+    <div class="chat-box" id="chat">
+        <div class="chat-header">Empire Concierge <span onclick="toggleChat()" style="float:right; cursor:pointer">✕</span></div>
+        <div class="chat-body">
+            Welcome to the Live Freely Empire. How can I assist you with your yacht or lifestyle inquiry today?
+        </div>
+    </div>
+
+    <div id="dynamic-modal" class="modal">
+        <div class="login-box">
+            <h2 id="modal-title" style="color: var(--gold); margin-bottom: 20px;">TITLE</h2>
+            <div id="modal-body" style="font-size: 0.8rem; color: #ccc; line-height: 1.6; text-align: left;"></div>
+            <br>
+            <div class="gold-btn" style="padding: 10px 30px; font-size: 0.8rem;" onclick="closeModal()">CLOSE</div>
+        </div>
+    </div>
+
+    <div id="login-modal" class="modal">
+        <div class="login-box">
+            <h2 style="color: var(--gold); margin-bottom: 20px;">MEMBER ACCESS</h2>
+            <input type="text" placeholder="Member ID" class="login-input">
+            <input type="password" placeholder="Password" class="login-input">
+            <br><br>
+            <div class="gold-btn" onclick="alert('Access Denied: Please contact concierge.')">ENTER PORTAL</div>
+            <p style="margin-top: 20px; font-size: 0.8rem; cursor: pointer;" onclick="closeLogin()">CLOSE</p>
+        </div>
+    </div>
+
+    <script>
+        // --- LAG-FREE CURSOR ---
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', e => {
+            cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+        });
+
+        // --- GLITTER RAIN ---
+        const canvas = document.getElementById('glitter-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const particles = [];
+        function initGlitter() {
+            for(let i=0; i<60; i++) { 
+                particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, speed: Math.random()*2+1, size: Math.random()*2 });
+            }
+        }
+        function drawGlitter() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            ctx.fillStyle = '#d4af37';
+            particles.forEach(p => {
+                p.y += p.speed;
+                if(p.y > canvas.height) p.y = 0;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+            });
+            requestAnimationFrame(drawGlitter);
+        }
+        initGlitter();
+        drawGlitter();
+
+        // --- SCROLL REVEAL ANIMATION ---
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+        // --- MODALS & CHAT ---
+        function openLogin() { document.getElementById('login-modal').style.display = 'flex'; }
+        function closeLogin() { document.getElementById('login-modal').style.display = 'none'; }
+        function toggleChat() { 
+            const chat = document.getElementById('chat');
+            chat.style.display = chat.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function openModal(type) {
+            const modal = document.getElementById('dynamic-modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+            modal.style.display = 'flex';
+            if(type === 'careers') {
+                title.innerText = "CAREERS";
+                body.innerHTML = "We are currently seeking:<br>- Experience Brokers<br>- VIP Hostesses<br>- Logistics Managers<br><br>Send your resume to: <b>careers@livefreely.com</b>";
+            } else {
+                title.innerText = "TERMS & POLICY";
+                body.innerHTML = "<b>Reservations:</b> A deposit is required to reserve. Availability is first come first served.<br><br><b>Cancellations/Refunds:</b> All deposits are NON REFUNDABLE. They are applied to admin tasks.<br><br><b>Rescheduling:</b> Allowed for weather conditions. Voluntary reschedule requires 7 days notice.";
+            }
+        }
+        function closeModal() { document.getElementById('dynamic-modal').style.display = 'none'; }
+
+        // --- SCROLL COLOR SHIFT ---
+        window.addEventListener('scroll', () => {
+            const bioSection = document.getElementById('visionary');
+            const rect = bioSection.getBoundingClientRect();
+            const center = window.innerHeight / 2;
+            if (rect.top < center && rect.bottom > center) {
+                bioSection.classList.add('light-mode');
+            } else {
+                bioSection.classList.remove('light-mode');
+            }
+        });
+    </script>
+</body>
+</html>
